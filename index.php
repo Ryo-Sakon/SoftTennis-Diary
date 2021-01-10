@@ -1,37 +1,52 @@
 <?php
-if ($_POST['counter'] & $_POST['ourPoint'] & $_POST['theirPoint'] & $_POST['ourGame'] & $_POST['theirPoint'] ==null){ 
-$i=0;
-$ourPointCount=0;
-$theirPointCount=0;
-$ourGameCount=0;
-$theirGameCount=0;
-$gameNumber=$ourGameCount+$theirGameCount+1;
-}else{
-$i=$_POST['counter'];
-$ourPointCount=$_POST['ourPointCount'];
-$theirPointCount=$_POST['theirPointCount'];
-$ourGameCount=$_POST['ourGameCount'];
-$theirGameCount=$_POST['theirGameCount'];
+//初期設定
+if (empty($_POST['counterPlus']) && empty($_POST['ourPointPlus']) && empty($_POST['theirPointPlus']) && empty($_POST['ourGamePlus']) && empty($_POST['theirGamePlus'])) {
+    $i = 0;
+    $ourPointCount = 0;
+    $theirPointCount = 0;
+    $ourGameCount = 0;
+    $theirGameCount = 0;
+} else {
+  //試合開始後の設定
+    $i = $_POST['counter'];
+    $ourPointCount = $_POST['ourPointCount'];
+    $theirPointCount = $_POST['theirPointCount'];
+    $ourGameCount = $_POST['ourGameCount'];
+    $theirGameCount = $_POST['theirGameCount'];
 }
 
-if (isset($_POST['counter'])) {
-  $i++;
+//ポイント・ゲームの加算
+if (isset($_POST['counterPlus'])) {
+    $i++;
 }
-if (isset($_POST['ourPoint'])) {
-  $ourPointCount++;
-$i=0;}
-if (isset($_POST['theirPoint'])) {  $theirPointCount++;
-  $i=0;}
-if (isset($_POST['ourGame'])) {  $ourGameCount++;
-$ourPointCount=0;
-$theirPointCount=0;
-$i=0;}
-if (isset($_POST['theirGame'])) {  $theirGameCount++;
-  $ourPointCount=0;
-$theirPointCount=0;
-$i=0;}
 
-$server = $_GET['which'];
+if (isset($_POST['ourPointPlus'])) {
+    $ourPointCount++;
+    $i = 0;}
+if (isset($_POST['theirPointPlus'])) {
+    $theirPointCount++;
+    $i = 0;}
+if (isset($_POST['ourGamePlus'])) {
+    $ourGameCount++;
+    $ourPointCount = 0;
+    $theirPointCount = 0;
+    $i = 0;}
+if (isset($_POST['theirGamePlus'])) {
+    $theirGameCount++;
+    $ourPointCount = 0;
+    $theirPointCount = 0;
+    $i = 0;}
+
+$server = $_GET['server'];
+switch($server){
+  case "自分":
+  $receiver = "相手";
+  break;
+  case "相手":
+  $receiver = "自分";
+  break;
+  }
+$gameNumber = $ourGameCount + $theirGameCount + 1;
 
 ?>
 
@@ -52,81 +67,124 @@ $server = $_GET['which'];
     <form action="" method="get">
       <span>自分のペア</span>
       <input type="text" name="player" id="" placeholder="例：田中・鈴木">
-
       <span>相手のペア</span>
       <input type="text" name="player" id="" placeholder="例：田中・鈴木">
 
       <br>
       <span>サーブ権をとったのはどっち？</span>
-      <input type="radio" name="which" value="ourselves">自分
-      <input type="radio" name="which" value="themselves">相手
-
+      <input type="radio" name="server" value="自分">自分
+      <input type="radio" name="server" value="相手">相手
       <input type="submit" value="記録開始">
     </form>
 
-
-      <p>第<?=$gameNumber?>ゲーム目</p>
+    <?php
+switch ($gameNumber) {
+    case 7:
+        echo "ファイナルゲーム";
+        break;
+    case 8:
+        echo "ゲーム終了";
+        break;
+    default:
+        echo "第{$gameNumber}ゲーム目";
+}
+?>
       <p>ゲームカウント　自分：<?=$ourGameCount?>ー相手：<?=$theirGameCount?></p>
       <p>ポイントカウント　自分：<?=$ourPointCount?>ー相手：<?=$theirPointCount?></p>
 
-      <form action="" method="post">
-      <input type="hidden" name="ourPointCount" value="<?=$ourPointCount?>">
+<!-- ラリー数をカウント -->
+<form action="" method="post">
+<input type="hidden" name="ourPointCount" value="<?=$ourPointCount?>">
 <input type="hidden" name="theirPointCount" value="<?=$theirPointCount?>">
-        <input type="hidden" name="counter" value="<?=$i?>">
-        <input type="submit" value="クリック">
-      </form>
-      <p><?=$i?>回</p>
-      <?php if ($i % 2 == 0) {
-    echo "自分のボール";
+<input type="hidden" name="ourGameCount" value="<?=$ourGameCount?>">
+<input type="hidden" name="theirGameCount" value="<?=$theirGameCount?>">
+<input type="hidden" name="counter" value="<?=$i?>">
+<input type="submit" name="counterPlus" value="クリック">
+</form>
 
+<!-- クリック回数-->
+<p><?=$i?>回</p>
+
+<!-- ボールの持ち手 -->
+<?php if ($i % 2 == 0) {
+    echo "{$server}のボール";
 } else {
-    echo "相手のボール";
+    echo "{$receiver}のボール";
 }
 ?>
+
+<!-- ポイントの加算 -->
 <p>ポイントが決まったら押す</p>
-<form action=""  name="game" method="post">
+<!-- 自分が得点 -->
+<form action="" method="post">
 <input type="hidden" name="ourPointCount" value="<?=$ourPointCount?>">
 <input type="hidden" name="theirPointCount" value="<?=$theirPointCount?>">
-
-        <input type="submit" name="ourPoint" value="自分が得点しました">
-
-      </form>
-
-      <form action="" name="game" method="post">
-<input type="hidden" name="theirPointCount" value="<?=$theirPointCount?>">
+<input type="hidden" name="ourGameCount" value="<?=$ourGameCount?>">
+<input type="hidden" name="theirGameCount" value="<?=$theirGameCount?>">
+<input type="hidden" name="counter" value="<?=$i?>">
+<input type="submit" name="ourPointPlus" value="自分が得点しました">
+</form>
+<!-- 相手が得点 -->
+<form action="" method="post">
 <input type="hidden" name="ourPointCount" value="<?=$ourPointCount?>">
+<input type="hidden" name="theirPointCount" value="<?=$theirPointCount?>">
+<input type="hidden" name="ourGameCount" value="<?=$ourGameCount?>">
+<input type="hidden" name="theirGameCount" value="<?=$theirGameCount?>">
+<input type="hidden" name="counter" value="<?=$i?>">
+<input type="submit" name="theirPointPlus" value="相手が得点しました">
+</form>
 
-        <input type="submit" name="theirPoint" value="相手が得点しました">
-
-      </form>
+<!-- ゲーム取得条件の追加（４点以上（７点）とっており、２ポイント以上差がある） -->
 <?php
-if($ourPointCount>=4 || $theirPointCount>=4 && abs($ourPointCount-$theirPointCount)>=2){
-  if($ourPointCount>$theirPointCount){
-    
-  }
-  ?>
+if ($gameNumber <= 6) { //ファイナルゲームでない場合
+    if (($ourPointCount >= 4 || $theirPointCount >= 4) && abs($ourPointCount - $theirPointCount) >= 2) {
+        if ($ourPointCount > $theirPointCount) {
+            $gamePlus = "ourGamePlus";
+        } else {
+            $gamePlus = "theirGamePlus";
+        }
+
+        ?>
+
 <p>次のゲームに進みますか？</p>
+<!-- ゲームカウントの追加 -->
+<form action="" method="post">
+<input type="hidden" name="ourGameCount" value="<?=$ourGameCount?>">
+<input type="hidden" name="theirGameCount" value="<?=$theirGameCount?>">
+<input type="submit" name="<?=$gamePlus?>" value="進みます">
+</form>
 
-<form action="" name="game" method="post">
-  
-<input type="hidden" name="winner" value="<?=$winner?>">
-
-        <input type="submit" name="ourPoint" value="YES">
-
-      </form>
-
-      <form action="" method="post">
-<input type="hidden" name="theirPointCount" value="<?=$theirPointCount?>">
-<input type="hidden" name="ourPointCount" value="<?=$ourPointCount?>">
-
-        <input type="submit" name="theirPoint" value="相手が得点しました">
-
-      </form>
 <?php
+}
+}
+if ($gameNumber == 7) { //ファイナルゲームの場合
+    if (($ourPointCount >= 7 || $theirPointCount >= 7) && abs($ourPointCount - $theirPointCount) >= 2) {
+        if ($ourPointCount > $theirPointCount) {
+            $gamePlus = "ourGamePlus";
+        } else {
+            $gamePlus = "theirGamePlus";
+        }
+
+        ?>
+<form action="" method="post">
+<input type="hidden" name="ourGameCount" value="<?=$ourGameCount?>">
+<input type="hidden" name="theirGameCount" value="<?=$theirGameCount?>">
+<input type="submit" name="<?=$gamePlus?>" value="進みます">
+</form>
+
+<?php
+}
+}
+if ($gameNumber == 8) {
+    if ($ourGameCount > $theirGameCount) {
+        echo "あなたの勝ちです。おめでとうございます！";
+    } else {
+        echo "あいての勝ちです。次は頑張りましょう！";
+
     }
-      ?>
+}
 
-
+?>
 
 
 
