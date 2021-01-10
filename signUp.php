@@ -1,4 +1,5 @@
 <?php
+require_once('settings.php');
 require_once('db_connect.php');
 
 
@@ -33,7 +34,7 @@ echo "<a href='login.php'>ログイン画面</a>";
   <link rel="stylesheet" type="text/css" href="./css/style.css">
 </head>
 <body>
-    <h1>ソフトテニスダイアリー</h1>
+    <h1><?=$title?></h1>
     <h1>登録画面</h1>
     <form action="" method="post">
 <span>ペアID</span><input type="text" name="id"><br>

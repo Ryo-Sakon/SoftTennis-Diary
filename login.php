@@ -1,4 +1,5 @@
 <?php
+require_once('settings.php');
 require_once('db_connect.php');
 session_start();
 
@@ -16,8 +17,11 @@ if(isset($_POST["pairs_id"]) && $_POST["pairs_id"]!=""){
 
 if($array["pairs_id"]==$_POST["pairs_id"] && $array["password"]==$_POST["password"]){
 
-    $_SESSION["pairs_id"]=$_POST["pairs_id"];
-    header('Location:index.php');
+    $_SESSION["pairs_id"]=$array["pairs_id"];
+    $_SESSION["player_A"]=$array["player_A"];
+    $_SESSION["player_B"]=$array["player_B"];
+
+    header('Location:main.php');
     exit();
 
 }
@@ -36,8 +40,9 @@ if($array["pairs_id"]==$_POST["pairs_id"] && $array["password"]==$_POST["passwor
   <link rel="stylesheet" type="text/css" href="./css/style.css">
 </head>
 <body>
-    <h1>ソフトテニスダイアリー</h1>
+    <h1><?=$title?></h1>
     <h1>ログイン画面</h1>
+    <a href="signUp.php">新規登録はこちら</a><br>
     <form action="" method="post">
 <span>ペアID</span><input type="text" name="pairs_id">
 <span>パスワード</span><input type="password" name="password">

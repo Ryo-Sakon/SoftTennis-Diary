@@ -1,14 +1,13 @@
 <?php
-require_once('db_connect.php');
+require_once 'settings.php';
+require_once 'db_connect.php';
 session_start();
-$pdo=db_connect();
+$pdo = db_connect();
 
-
-echo "ユーザーID　{$_SESSION["pairs_id"]}　さん　こんにちは";
-
+echo "ペアID　{$_SESSION["pairs_id"]}　さん　こんにちは";
 
 //初期設定
-if (empty($_POST)){
+if (empty($_POST)) {
     $i = 0;
     $ourPointCount = 0;
     $theirPointCount = 0;
@@ -32,10 +31,10 @@ if (isset($_POST['counterPlus'])) {
 if (isset($_POST['ourPointPlus'])) {
     $ourPointCount++;
     $i = 0;
-  $stmt=$PDO->prepare("INSERT INTO posts(pairs_id) VALUES()");
-  $stmt->execute(array());
+    $stmt = $PDO->prepare("INSERT INTO posts(pairs_id) VALUES()");
+    $stmt->execute(array());
 
-  }
+}
 if (isset($_POST['theirPointPlus'])) {
     $theirPointCount++;
     $i = 0;}
@@ -70,25 +69,25 @@ $finalGamePointNumber = $ourPointCount + $theirPointCount;
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
+  <title><?=$title?></title>
   <link rel="stylesheet" type="text/css" href="./css/style.css">
 </head>
 
 <body>
-    <h1>ソフトテニスダイアリー</h1>
-    
+    <h1><?=$title?></h1>
+
 
 
     <form action="" method="get">
       <span>自分のペア</span>
       <input type="text" size="30" name="players" id="" placeholder="例：田中・鈴木（○○高校）"><br>
       <?php
-      $stmt=$pdo->prepare("SELECT * FROM ");
-      ?>
+echo '後衛：' . $_SESSION['player_A'] . ' 前衛：' . $_SESSION['player_B'] . '<br>';
+?>
       <span>相手のペア</span>
       <input type="text" size="30" name="opponents" id="" placeholder="例：田中・鈴木（○○高校）"><br>
 
-      
+
       <span>サービス権をとったのはどっち？</span>
       <input type="radio" name="server" value="自分">自分
       <input type="radio" name="server" value="相手">相手
@@ -97,25 +96,22 @@ $finalGamePointNumber = $ourPointCount + $theirPointCount;
 
     <?php
 
-switch($gameNumber){
-  case $gameNumber == 1 || $gameNumber == 4 || $gameNumber == 5:{
-        echo "第{$gameNumber}ゲーム目　Server：{$server}　Receiver：{$receiver}";
-        break;
-}
-case $gameNumber == 2 || $gameNumber == 3 || $gameNumber == 6:
+switch ($gameNumber) {
+    case $gameNumber == 1 || $gameNumber == 4 || $gameNumber == 5:{
+            echo "第{$gameNumber}ゲーム目　Server：{$server}　Receiver：{$receiver}";
+            break;
+        }
+    case $gameNumber == 2 || $gameNumber == 3 || $gameNumber == 6:
         echo "第{$gameNumber}ゲーム目　Server：{$receiver}　Receiver：{$server}";
         break;
     case 7:
-        if($finalGamePointNumber%4==0 || $finalGamePointNumber%4==1){
-        echo "ファイナルゲーム　Server：{$server}　Receiver：{$receiver}";
-        }else{
-        echo "ファイナルゲーム　Server：{$receiver}　Receiver：{$server}";
-        }        
+        if ($finalGamePointNumber % 4 == 0 || $finalGamePointNumber % 4 == 1) {
+            echo "ファイナルゲーム　Server：{$server}　Receiver：{$receiver}";
+        } else {
+            echo "ファイナルゲーム　Server：{$receiver}　Receiver：{$server}";
+        }
         break;
-      }
-    
-
-
+}
 
 ?>
       <p>ゲームカウント　自分：<?=$ourGameCount?>ー相手：<?=$theirGameCount?></p>
@@ -165,17 +161,17 @@ case $gameNumber == 2 || $gameNumber == 3 || $gameNumber == 6:
 
 <!-- ゲーム取得条件の追加（４点以上（７点）とっており、２ポイント以上差がある） -->
 <?php
-if ($ourGameCount<4 && $theirGameCount<4) {
+if ($ourGameCount < 4 && $theirGameCount < 4) {
 
-if ($gameNumber <= 6) { //ファイナルゲームでない場合
-    if (($ourPointCount >= 4 || $theirPointCount >= 4) && abs($ourPointCount - $theirPointCount) >= 2) {
-        if ($ourPointCount > $theirPointCount) {
-            $gamePlus = "ourGamePlus";
-        } else {
-            $gamePlus = "theirGamePlus";
-        }
+    if ($gameNumber <= 6) { //ファイナルゲームでない場合
+        if (($ourPointCount >= 4 || $theirPointCount >= 4) && abs($ourPointCount - $theirPointCount) >= 2) {
+            if ($ourPointCount > $theirPointCount) {
+                $gamePlus = "ourGamePlus";
+            } else {
+                $gamePlus = "theirGamePlus";
+            }
 
-        ?>
+            ?>
 
 <p>次のゲームに進みますか？</p>
 <!-- ゲームカウントの追加 -->
@@ -187,16 +183,16 @@ if ($gameNumber <= 6) { //ファイナルゲームでない場合
 
 <?php
 }
-}
-if ($gameNumber == 7) { //ファイナルゲームの場合
-    if (($ourPointCount >= 7 || $theirPointCount >= 7) && abs($ourPointCount - $theirPointCount) >= 2) {
-        if ($ourPointCount > $theirPointCount) {
-            $gamePlus = "ourGamePlus";
-        } else {
-            $gamePlus = "theirGamePlus";
-        }
+    }
+    if ($gameNumber == 7) { //ファイナルゲームの場合
+        if (($ourPointCount >= 7 || $theirPointCount >= 7) && abs($ourPointCount - $theirPointCount) >= 2) {
+            if ($ourPointCount > $theirPointCount) {
+                $gamePlus = "ourGamePlus";
+            } else {
+                $gamePlus = "theirGamePlus";
+            }
 
-        ?>
+            ?>
 <form action="" method="post">
 <input type="hidden" name="ourGameCount" value="<?=$ourGameCount?>">
 <input type="hidden" name="theirGameCount" value="<?=$theirGameCount?>">
@@ -205,10 +201,9 @@ if ($gameNumber == 7) { //ファイナルゲームの場合
 
 <?php
 }
-}
-}
-else{
-  if ($ourGameCount > $theirGameCount) {
+    }
+} else {
+    if ($ourGameCount > $theirGameCount) {
         echo "あなたの勝ちです。おめでとうございます！";
     } else {
         echo "あいての勝ちです。次は頑張りましょう！";
