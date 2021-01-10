@@ -1,13 +1,22 @@
 <?php
+require_once('db_connect.php');
+session_start();
+$pdo=db_connect();
+
+
+echo "ユーザーID　{$_SESSION["pairs_id"]}　さん　こんにちは";
+
+
 //初期設定
-if (empty($_POST['counterPlus']) && empty($_POST['ourPointPlus']) && empty($_POST['theirPointPlus']) && empty($_POST['ourGamePlus']) && empty($_POST['theirGamePlus'])) {
+if (empty($_POST)){
     $i = 0;
     $ourPointCount = 0;
     $theirPointCount = 0;
     $ourGameCount = 0;
     $theirGameCount = 0;
+
 } else {
-  //試合開始後の設定
+    //試合開始後の設定
     $i = $_POST['counter'];
     $ourPointCount = $_POST['ourPointCount'];
     $theirPointCount = $_POST['theirPointCount'];
@@ -22,7 +31,11 @@ if (isset($_POST['counterPlus'])) {
 
 if (isset($_POST['ourPointPlus'])) {
     $ourPointCount++;
-    $i = 0;}
+    $i = 0;
+  $stmt=$PDO->prepare("INSERT INTO posts(pairs_id) VALUES()");
+  $stmt->execute(array());
+
+  }
 if (isset($_POST['theirPointPlus'])) {
     $theirPointCount++;
     $i = 0;}
@@ -38,16 +51,16 @@ if (isset($_POST['theirGamePlus'])) {
     $i = 0;}
 
 $server = $_GET['server'];
-switch($server){
-  case "自分":
-  $receiver = "相手";
-  break;
-  case "相手":
-  $receiver = "自分";
-  break;
-  }
+switch ($server) {
+    case "自分":
+        $receiver = "相手";
+        break;
+    case "相手":
+        $receiver = "自分";
+        break;
+}
 $gameNumber = $ourGameCount + $theirGameCount + 1;
-
+$finalGamePointNumber = $ourPointCount + $theirPointCount;
 ?>
 
 
@@ -63,31 +76,47 @@ $gameNumber = $ourGameCount + $theirGameCount + 1;
 
 <body>
     <h1>ソフトテニスダイアリー</h1>
+    
+
 
     <form action="" method="get">
       <span>自分のペア</span>
-      <input type="text" name="player" id="" placeholder="例：田中・鈴木">
+      <input type="text" size="30" name="players" id="" placeholder="例：田中・鈴木（○○高校）"><br>
+      <?php
+      $stmt=$pdo->prepare("SELECT * FROM ");
+      ?>
       <span>相手のペア</span>
-      <input type="text" name="player" id="" placeholder="例：田中・鈴木">
+      <input type="text" size="30" name="opponents" id="" placeholder="例：田中・鈴木（○○高校）"><br>
 
-      <br>
-      <span>サーブ権をとったのはどっち？</span>
+      
+      <span>サービス権をとったのはどっち？</span>
       <input type="radio" name="server" value="自分">自分
       <input type="radio" name="server" value="相手">相手
       <input type="submit" value="記録開始">
     </form>
 
     <?php
-switch ($gameNumber) {
-    case 7:
-        echo "ファイナルゲーム";
+
+switch($gameNumber){
+  case $gameNumber == 1 || $gameNumber == 4 || $gameNumber == 5:{
+        echo "第{$gameNumber}ゲーム目　Server：{$server}　Receiver：{$receiver}";
         break;
-    case 8:
-        echo "ゲーム終了";
-        break;
-    default:
-        echo "第{$gameNumber}ゲーム目";
 }
+case $gameNumber == 2 || $gameNumber == 3 || $gameNumber == 6:
+        echo "第{$gameNumber}ゲーム目　Server：{$receiver}　Receiver：{$server}";
+        break;
+    case 7:
+        if($finalGamePointNumber%4==0 || $finalGamePointNumber%4==1){
+        echo "ファイナルゲーム　Server：{$server}　Receiver：{$receiver}";
+        }else{
+        echo "ファイナルゲーム　Server：{$receiver}　Receiver：{$server}";
+        }        
+        break;
+      }
+    
+
+
+
 ?>
       <p>ゲームカウント　自分：<?=$ourGameCount?>ー相手：<?=$theirGameCount?></p>
       <p>ポイントカウント　自分：<?=$ourPointCount?>ー相手：<?=$theirPointCount?></p>
@@ -136,6 +165,8 @@ switch ($gameNumber) {
 
 <!-- ゲーム取得条件の追加（４点以上（７点）とっており、２ポイント以上差がある） -->
 <?php
+if ($ourGameCount<4 && $theirGameCount<4) {
+
 if ($gameNumber <= 6) { //ファイナルゲームでない場合
     if (($ourPointCount >= 4 || $theirPointCount >= 4) && abs($ourPointCount - $theirPointCount) >= 2) {
         if ($ourPointCount > $theirPointCount) {
@@ -175,8 +206,9 @@ if ($gameNumber == 7) { //ファイナルゲームの場合
 <?php
 }
 }
-if ($gameNumber == 8) {
-    if ($ourGameCount > $theirGameCount) {
+}
+else{
+  if ($ourGameCount > $theirGameCount) {
         echo "あなたの勝ちです。おめでとうございます！";
     } else {
         echo "あいての勝ちです。次は頑張りましょう！";
