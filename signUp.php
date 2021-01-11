@@ -3,13 +3,11 @@ require_once('settings.php');
 require_once('db_connect.php');
 
 
-if(isset($_POST)){
+if(isset($_POST['id'])){
 $pdo=db_connect();
 $stmt=$pdo->prepare("INSERT INTO pairs(pairs_id,password,player_A,player_B,Team) VALUES(:id,:password,:A,:B,:team)");
 $stmt->execute(array(':id'=>$_POST['id'],':password'=>$_POST['password'],':A'=>$_POST['player_A'],':B'=>$_POST['player_B'],':team'=>$_POST['team']));
-echo '登録しました。<br>';
-echo "<a href='login.php'>ログイン画面</a>";
-
+echo '登録が完了しました。';
 }
 //バインド
 ?>
@@ -36,8 +34,11 @@ echo "<a href='login.php'>ログイン画面</a>";
 <body>
     <h1><?=$title?></h1>
     <h1>登録画面</h1>
+    <?php
+echo "<a href='login.php'>ログイン画面</a><br><br>";
+?>
     <form action="" method="post">
-<span>ペアID</span><input type="text" name="id"><br>
+<span>ペアID</span><input type="text" name="id" placeholder="英数字"><br>
 <span>player A</span><input type="text" name="player_A" placeholder="例：庭球太郎"><br>
 <span>player B</span><input type="text" name="player_B" placeholder="例：庭球次郎"><br>
 <span>所属名</span><input type="text" name="team" placeholder="例：○○高校"><br>

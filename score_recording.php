@@ -1,65 +1,109 @@
 <?php
-require_once 'settings.php';
-require_once 'db_connect.php';
+require_once ('settings.php');
+require_once ('db_connect.php');
 session_start();
 $pdo = db_connect();
 
-echo "ペアID　{$_SESSION["pairs_id"]}　さん　こんにちは";
+$i = $_SESSION['counter'];
+$ourPointCount = $_SESSION['ourPointCount'];
+$theirPointCount = $_SESSION['theirPointCount'];
+$ourGameCount = $_SESSION['ourGameCount'];
+$theirGameCount = $_SESSION['theirGameCount'];
+$gameCount="{$ourGameCount}ー{$theirGameCount}";
+$pointCount="{$ourPointCount}ー{$theirPointCount}";
 
-//初期設定
-if (empty($_POST)) {
-    $i = 0;
-    $ourPointCount = 0;
-    $theirPointCount = 0;
-    $ourGameCount = 0;
-    $theirGameCount = 0;
+$gameNumber = $ourGameCount + $theirGameCount + 1;
+$finalGamePointNumber = $ourPointCount + $theirPointCount;
 
-} else {
-    //試合開始後の設定
-    $i = $_POST['counter'];
-    $ourPointCount = $_POST['ourPointCount'];
-    $theirPointCount = $_POST['theirPointCount'];
-    $ourGameCount = $_POST['ourGameCount'];
-    $theirGameCount = $_POST['theirGameCount'];
+//サーバー・レシーバーの場合分け
+switch ($gameNumber) {
+    case $gameNumber == 1 || $gameNumber == 4 || $gameNumber == 5:{
+            $server=$_SESSION['started_as_server'];
+            $receiver=$_SESSION['started_as_receiver'];
+            break;
+        }
+    case $gameNumber == 2 || $gameNumber == 3 || $gameNumber == 6:
+        $server=$_SESSION['started_as_receiver'];
+        $receiver=$_SESSION['started_as_server'];
+        break;
+    case 7:
+        if ($finalGamePointNumber % 4 == 0 || $finalGamePointNumber % 4 == 1) {
+            $server=$_SESSION['started_as_server'];
+            $receiver=$_SESSION['started_as_receiver'];
+            echo "ファイナルゲーム　Server：{$server}　Receiver：{$receiver}";
+        } else {
+            $server=$_SESSION['started_as_receiver'];
+            $receiver=$_SESSION['started_as_server'];
+            echo "ファイナルゲーム　Server：{$receiver}　Receiver：{$server}";
+        }
+        break;
 }
+
 
 //ポイント・ゲームの加算
 if (isset($_POST['counterPlus'])) {
-    $i++;
+    $_SESSION['counter']++;
+    header('Location:score_recording.php');
+    exit();
 }
 
 if (isset($_POST['ourPointPlus'])) {
-    $ourPointCount++;
-    $i = 0;
-    $stmt = $PDO->prepare("INSERT INTO posts(pairs_id) VALUES()");
-    $stmt->execute(array());
+    
+    //最後のショット分をプラス
+    $_SESSION['counter']++;
+    
+    // $stmt=$pdo->prepare("INSERT INTO pairs(pairs_login_id,password,player_A,player_B,Team) VALUES(:id,:password,:A,:B,:team)");
+    // $stmt->execute(array(':id'=>3,':password'=>'ddd',':A'=>'Aさん',':B'=>'Bさん',':team'=>'C高校'));
+    
+
+    $stmt = $pdo->prepare("INSERT INTO posts(match_id,match_title,pairs_id,players,opponents,Result,times_of_rallies,Server,Receiver,last_situation,game_count,point_count,Point) VALUES(:match_id,:match_title,:id,:players,:opponents,:result,:times_of_rallies,:server,:receiver,:last_situation,:game_count,:point_count,:point)");
+    // $stmt = $pdo->prepare("INSERT INTO posts(match_id,match_title,pairs_id,players,opponents,Result,times_of_rallies,server,receiver,last_situation,game_count,point_count,Point) VALUES(2,'そのへんの試合',7,'林・山田','田中・佐藤ペア','WON',12,'自分','相手','ボレー','3-2','4-5','自分')");
+    $stmt->bindParam(':match_id',$_SESSION['match_id']);
+    $stmt->bindParam(':match_title',$_SESSION['match_title']);
+    $stmt->bindParam(':id',$_SESSION['pairs_id']);
+    $stmt->bindParam(':players',$_SESSION['players']);
+    $stmt->bindParam(':opponents',$_SESSION['opponents']);
+    $stmt->bindValue(':result','WON');
+    $stmt->bindParam(':times_of_rallies',$_SESSION['counter']);
+    $stmt->bindParam(':server',$server);
+    $stmt->bindParam(':receiver',$receiver);
+    $stmt->bindValue(':last_situation','ボレー');
+    $stmt->bindParam(':game_count',$gameCount);
+    $stmt->bindParam(':point_count',$pointCount);
+    $stmt->bindValue(':point','自分');
+    $stmt->execute();
+
+    $_SESSION['ourPointCount']++;
+    $_SESSION['counter']=0;
+    header('Location:score_recording.php');
+    exit();
 
 }
 if (isset($_POST['theirPointPlus'])) {
-    $theirPointCount++;
-    $i = 0;}
-if (isset($_POST['ourGamePlus'])) {
-    $ourGameCount++;
-    $ourPointCount = 0;
-    $theirPointCount = 0;
-    $i = 0;}
-if (isset($_POST['theirGamePlus'])) {
-    $theirGameCount++;
-    $ourPointCount = 0;
-    $theirPointCount = 0;
-    $i = 0;}
-
-$server = $_GET['server'];
-switch ($server) {
-    case "自分":
-        $receiver = "相手";
-        break;
-    case "相手":
-        $receiver = "自分";
-        break;
+    $_SESSION['theirPointCount']++;
+    $_SESSION['counter']=0;
+    header('Location:score_recording.php');
+    exit();
 }
-$gameNumber = $ourGameCount + $theirGameCount + 1;
-$finalGamePointNumber = $ourPointCount + $theirPointCount;
+if (isset($_POST['ourGamePlus'])) {
+    $_SESSION['ourGameCount']++;
+    $_SESSION['ourPointCount']=0;
+    $_SESSION['theirPointCount']=0;
+    $_SESSION['counter']=0;
+    header('Location:score_recording.php');
+    exit();
+}
+if (isset($_POST['theirGamePlus'])) {
+    $_SESSION['theirGameCount']++;
+    $_SESSION['ourPointCount']=0;
+    $_SESSION['theirPointCount']=0;
+    $_SESSION['counter']=0;
+    header('Location:score_recording.php');
+    exit();
+}
+
+
+
 ?>
 
 
@@ -75,60 +119,28 @@ $finalGamePointNumber = $ourPointCount + $theirPointCount;
 
 <body>
     <h1><?=$title?></h1>
-
-
-
-    <form action="" method="get">
-      <span>自分のペア</span>
-      <input type="text" size="30" name="players" id="" placeholder="例：田中・鈴木（○○高校）"><br>
-      <?php
-echo '後衛：' . $_SESSION['player_A'] . ' 前衛：' . $_SESSION['player_B'] . '<br>';
+<?php
+echo "ペアID　{$_SESSION["pairs_id"]}　さん　頑張ってください！<br>";
 ?>
-      <span>相手のペア</span>
-      <input type="text" size="30" name="opponents" id="" placeholder="例：田中・鈴木（○○高校）"><br>
+<a href="main.php">記録を中断してメニュー画面へ戻る</a><br><br>
 
-
-      <span>サービス権をとったのはどっち？</span>
-      <input type="radio" name="server" value="自分">自分
-      <input type="radio" name="server" value="相手">相手
-      <input type="submit" value="記録開始">
-    </form>
-
-    <?php
-
-switch ($gameNumber) {
-    case $gameNumber == 1 || $gameNumber == 4 || $gameNumber == 5:{
-            echo "第{$gameNumber}ゲーム目　Server：{$server}　Receiver：{$receiver}";
-            break;
-        }
-    case $gameNumber == 2 || $gameNumber == 3 || $gameNumber == 6:
-        echo "第{$gameNumber}ゲーム目　Server：{$receiver}　Receiver：{$server}";
-        break;
-    case 7:
-        if ($finalGamePointNumber % 4 == 0 || $finalGamePointNumber % 4 == 1) {
-            echo "ファイナルゲーム　Server：{$server}　Receiver：{$receiver}";
-        } else {
-            echo "ファイナルゲーム　Server：{$receiver}　Receiver：{$server}";
-        }
-        break;
-}
-
+<!-- 試合の基本情報 -->
+<?php
+echo '<span>試合タイトル：　</span>'.$_SESSION['match_title']. '<br>';
+echo '<span>自分のペア：　</span>'.'後衛：' . $_SESSION['player_A'] . ' 前衛：' . $_SESSION['player_B'] . '<br>';
+echo '<span>相手のペア：　</span>'.$_SESSION['opponents']. '<br>';
+echo "第{$gameNumber}ゲーム目　Server：{$server}　Receiver：{$receiver}";
 ?>
-      <p>ゲームカウント　自分：<?=$ourGameCount?>ー相手：<?=$theirGameCount?></p>
-      <p>ポイントカウント　自分：<?=$ourPointCount?>ー相手：<?=$theirPointCount?></p>
+    <p>ゲームカウント　自分：<?=$ourGameCount?>ー相手：<?=$theirGameCount?></p>
+    <p>ポイントカウント　自分：<?=$ourPointCount?>ー相手：<?=$theirPointCount?></p>
 
 <!-- ラリー数をカウント -->
 <form action="" method="post">
-<input type="hidden" name="ourPointCount" value="<?=$ourPointCount?>">
-<input type="hidden" name="theirPointCount" value="<?=$theirPointCount?>">
-<input type="hidden" name="ourGameCount" value="<?=$ourGameCount?>">
-<input type="hidden" name="theirGameCount" value="<?=$theirGameCount?>">
-<input type="hidden" name="counter" value="<?=$i?>">
 <input type="submit" name="counterPlus" value="クリック">
 </form>
 
 <!-- クリック回数-->
-<p><?=$i?>回</p>
+<p>ラリーの持続回数：　<?=$i?>回</p>
 
 <!-- ボールの持ち手 -->
 <?php if ($i % 2 == 0) {
@@ -139,23 +151,13 @@ switch ($gameNumber) {
 ?>
 
 <!-- ポイントの加算 -->
-<p>ポイントが決まったら押す</p>
+<p>ポイントが決まったら押してください↓</p>
 <!-- 自分が得点 -->
 <form action="" method="post">
-<input type="hidden" name="ourPointCount" value="<?=$ourPointCount?>">
-<input type="hidden" name="theirPointCount" value="<?=$theirPointCount?>">
-<input type="hidden" name="ourGameCount" value="<?=$ourGameCount?>">
-<input type="hidden" name="theirGameCount" value="<?=$theirGameCount?>">
-<input type="hidden" name="counter" value="<?=$i?>">
 <input type="submit" name="ourPointPlus" value="自分が得点しました">
 </form>
 <!-- 相手が得点 -->
 <form action="" method="post">
-<input type="hidden" name="ourPointCount" value="<?=$ourPointCount?>">
-<input type="hidden" name="theirPointCount" value="<?=$theirPointCount?>">
-<input type="hidden" name="ourGameCount" value="<?=$ourGameCount?>">
-<input type="hidden" name="theirGameCount" value="<?=$theirGameCount?>">
-<input type="hidden" name="counter" value="<?=$i?>">
 <input type="submit" name="theirPointPlus" value="相手が得点しました">
 </form>
 
@@ -176,8 +178,6 @@ if ($ourGameCount < 4 && $theirGameCount < 4) {
 <p>次のゲームに進みますか？</p>
 <!-- ゲームカウントの追加 -->
 <form action="" method="post">
-<input type="hidden" name="ourGameCount" value="<?=$ourGameCount?>">
-<input type="hidden" name="theirGameCount" value="<?=$theirGameCount?>">
 <input type="submit" name="<?=$gamePlus?>" value="進みます">
 </form>
 
@@ -194,8 +194,6 @@ if ($ourGameCount < 4 && $theirGameCount < 4) {
 
             ?>
 <form action="" method="post">
-<input type="hidden" name="ourGameCount" value="<?=$ourGameCount?>">
-<input type="hidden" name="theirGameCount" value="<?=$theirGameCount?>">
 <input type="submit" name="<?=$gamePlus?>" value="進みます">
 </form>
 
@@ -209,6 +207,8 @@ if ($ourGameCount < 4 && $theirGameCount < 4) {
         echo "あいての勝ちです。次は頑張りましょう！";
 
     }
+    echo '<br>';
+    echo '<a href="main.php">メニュー画面へ戻る</a>';
 }
 
 ?>
