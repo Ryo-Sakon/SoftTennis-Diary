@@ -17,7 +17,7 @@ session_start();
 <h1><?=$title?></h1>
 
 <?php
-echo "ペアID　{$_SESSION["pairs_id"]}　さん　こんにちは";
+echo "ペアID".$_SESSION["pairs_id"]."　さん　こんにちは";
 echo '<br>';
 ?>
 

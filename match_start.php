@@ -8,10 +8,12 @@ if(isset($_POST["opponents"]) && $_POST["opponents"]!=""){
     
 
     $pdo= db_connect();
-    $stmt=$pdo->prepare('SELECT posts.match_id,posts.pairs_id,pairs.* FROM posts,pairs WHERE posts.pairs_id=pairs.id AND pairs.pairs_login_id=:login_id ORDER BY posts.match_id DESC');
+    //$stmt=$pdo->prepare('SELECT posts.match_id,posts.pairs_id,pairs.* FROM posts,pairs WHERE posts.pairs_id=pairs.id AND pairs.pairs_login_id=:login_id ORDER BY posts.match_id DESC');
+    $stmt=$pdo->prepare('SELECT posts.match_id,posts.pairs_id,pairs.* FROM posts JOIN pairs ON posts.pairs_id=pairs.id WHERE pairs.pairs_login_id=:login_id ORDER BY posts.match_id DESC');
     $stmt->bindParam(':login_id',$_SESSION["pairs_id"]);
     $stmt->execute();
     $array=$stmt->fetch(PDO::FETCH_ASSOC);
+    
 
     $_SESSION['match_id']=$array['match_id']+1;
     $_SESSION['match_title']=$_POST['match_title'];

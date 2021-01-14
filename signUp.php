@@ -5,7 +5,7 @@ require_once('db_connect.php');
 
 if(isset($_POST['id'])){
 $pdo=db_connect();
-$stmt=$pdo->prepare("INSERT INTO pairs(pairs_id,password,player_A,player_B,Team) VALUES(:id,:password,:A,:B,:team)");
+$stmt=$pdo->prepare("INSERT INTO pairs(pairs_login_id,password,player_A,player_B,Team) VALUES(:id,:password,:A,:B,:team)");
 $stmt->execute(array(':id'=>$_POST['id'],':password'=>$_POST['password'],':A'=>$_POST['player_A'],':B'=>$_POST['player_B'],':team'=>$_POST['team']));
 echo '登録が完了しました。';
 }
