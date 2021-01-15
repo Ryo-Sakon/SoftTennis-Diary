@@ -9,7 +9,6 @@ $ourPointCount = $_SESSION['ourPointCount'];
 $theirPointCount = $_SESSION['theirPointCount'];
 $ourGameCount = $_SESSION['ourGameCount'];
 $theirGameCount = $_SESSION['theirGameCount'];
-$player = $_SESSION['pairs_id'];
 $gameCount="{$ourGameCount}ー{$theirGameCount}";
 $pointCount="{$ourPointCount}ー{$theirPointCount}";
 
@@ -50,7 +49,8 @@ if (isset($_POST['counterPlus'])) {
 
 if (isset($_POST['ourPointPlus'])) {
 
-    $stmt = $pdo->prepare("INSERT INTO posts(match_id,match_title,pairs_id,players,opponents,Result,times_of_rallies,Server,Receiver,last_situation,game_count,point_count,Point) VALUES(:match_id,:match_title,:id,:players,:opponents,:result,:times_of_rallies,:server,:receiver,:last_situation,:game_count,:point_count,:point)");
+    $stmt = $pdo->prepare("INSERT INTO posts(match_id,match_title,pairs_id,players,opponents,Result,times_of_rallies,Server,Receiver,last_situation,game_count,point_count,Point) 
+    VALUES(:match_id,:match_title,:id,:players,:opponents,:result,:times_of_rallies,:server,:receiver,:last_situation,:game_count,:point_count,:point)");
     $stmt->bindParam(':match_id',$_SESSION['match_id']);
     $stmt->bindParam(':match_title',$_SESSION['match_title']);
     $stmt->bindParam(':id',$_SESSION['pairs_id']);
@@ -60,11 +60,15 @@ if (isset($_POST['ourPointPlus'])) {
     $stmt->bindParam(':times_of_rallies',$_SESSION['counter']);
     $stmt->bindParam(':server',$server);
     $stmt->bindParam(':receiver',$receiver);
-    $stmt->bindValue(':last_situation','ボレー');
+    $stmt->bindValue(':last_situation','ストローク');
     $stmt->bindParam(':game_count',$gameCount);
     $stmt->bindParam(':point_count',$pointCount);
     $stmt->bindValue(':point','自分');
     $stmt->execute();
+    
+    // $stmt = $pdo->prepare("INSERT INTO posts(match_id,match_title,pairs_id,players,opponents,Result,times_of_rallies,Server,Receiver,last_situation,game_count,point_count,Point)
+    // VALUES($_SESSION['match_id']),$_SESSION['match_title'],$_SESSION['pairs_id'],$_SESSION['players'],$_SESSION['opponents'],'WON',$_SESSION['counter'],$server,$receiver,'ストローク',$gameCount,$pointCount,'自分')");
+    // $stmt->execute();
 
     $_SESSION['ourPointCount']++;
     $_SESSION['counter']=0;
@@ -74,7 +78,8 @@ if (isset($_POST['ourPointPlus'])) {
 }
 if (isset($_POST['theirPointPlus'])) {
 
-    $stmt = $pdo->prepare("INSERT INTO posts(match_id,match_title,pairs_id,players,opponents,Result,times_of_rallies,Server,Receiver,last_situation,game_count,point_count,Point) VALUES(:match_id,:match_title,:id,:players,:opponents,:result,:times_of_rallies,:server,:receiver,:last_situation,:game_count,:point_count,:point)");
+    $stmt = $pdo->prepare("INSERT INTO posts(match_id,match_title,pairs_id,players,opponents,Result,times_of_rallies,Server,Receiver,last_situation,game_count,point_count,Point) 
+    VALUES(:match_id,:match_title,:id,:players,:opponents,:result,:times_of_rallies,:server,:receiver,:last_situation,:game_count,:point_count,:point)");
     $stmt->bindParam(':match_id',$_SESSION['match_id']);
     $stmt->bindParam(':match_title',$_SESSION['match_title']);
     $stmt->bindParam(':id',$_SESSION['pairs_id']);
@@ -84,7 +89,7 @@ if (isset($_POST['theirPointPlus'])) {
     $stmt->bindParam(':times_of_rallies',$_SESSION['counter']);
     $stmt->bindParam(':server',$server);
     $stmt->bindParam(':receiver',$receiver);
-    $stmt->bindValue(':last_situation','ボレー');
+    $stmt->bindValue(':last_situation','スマッシュ');
     $stmt->bindParam(':game_count',$gameCount);
     $stmt->bindParam(':point_count',$pointCount);
     $stmt->bindValue(':point','相手');
@@ -130,7 +135,7 @@ if (isset($_POST['theirGamePlus'])) {
 <body>
     <h1><?=$title?></h1>
 <?php
-echo "ペアID".$_SESSION["pairs_id"]."　さん　頑張ってください！<br>";
+echo "ペアID　".$_SESSION["pairs_id"]."　さん　頑張ってください！<br>";
 echo $_SESSION[""];
 ?>
 <a href="main.php">記録を中断してメニュー画面へ戻る</a><br><br>

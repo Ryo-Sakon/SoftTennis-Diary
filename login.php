@@ -22,7 +22,8 @@ if($array["pairs_login_id"]==$_POST["pairs_id"] && $array["password"]==$_POST["p
     $_SESSION["player_B"]=$array["player_B"];
     
     
-    header('Location:main.php');
+    // header('Location:main.php');
+    header('Location:score_recording.php');
     exit();
 
 }

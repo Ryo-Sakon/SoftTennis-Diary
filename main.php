@@ -1,5 +1,6 @@
 <?php
 require_once('settings.php');
+require_once('db_connect.php');
 session_start();
 ?>
 
