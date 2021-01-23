@@ -19,6 +19,7 @@ session_start();
 
 <?php
 echo "ペアID".$_SESSION["pairs_id"]."　さん　こんにちは";
+var_dump($_SESSION);
 echo '<br>';
 ?>
 

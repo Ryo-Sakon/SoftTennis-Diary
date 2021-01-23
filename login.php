@@ -18,12 +18,13 @@ if(isset($_POST["pairs_id"]) && $_POST["pairs_id"]!=""){
 if($array["pairs_login_id"]==$_POST["pairs_id"] && $array["password"]==$_POST["password"]){
 
     $_SESSION["pairs_id"]=$array["pairs_login_id"];
+    
     $_SESSION["player_A"]=$array["player_A"];
     $_SESSION["player_B"]=$array["player_B"];
     
     
     // header('Location:main.php');
-    header('Location:score_recording.php');
+    header('Location:main.php');
     exit();
 
 }
